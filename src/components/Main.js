@@ -56,9 +56,9 @@ var ImgFigure = React.createClass({
 
     // 如果图片的旋转角度有值并且不为0，添加旋转角度
     if(this.props.arrange.rotate){
-      (['Moz','ms','Webkit','']).forEach(function(value){
+      (['MozTransform','msTransform','WebkitTransform','transform']).forEach(function(value){
 
-        styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
+        styleObj[value] = 'rotate(' + this.props.arrange.rotate + 'deg)';
       
       }.bind(this));
     }
@@ -86,6 +86,37 @@ var ImgFigure = React.createClass({
     )
   }
 })
+
+var ControllerUnit = React.createClass({
+  handleClick:function(e){
+    // 如果点击时当前正在选中状态的按钮，则翻转图片，否则将对应的图片居中
+    if(this.props.arrange.isCenter){
+      this.props.inverse();
+    }else{
+      this.props.center();
+    }
+
+    e.stopPropagation();
+    e.preventDefault();
+  },
+  render:function(){
+    var controllerUnitClassName = 'controller-unit';
+
+    // 如果对应的是居中的图片，显示控制按钮的居中状态
+    if(this.props.arrange.isCenter){
+      controllerUnitClassName += ' is-center';
+
+      // 如果同时对应的是翻转图片，显示控制按钮的翻转状态
+      if(this.props.arrange.isInverse){
+        controllerUnitClassName += ' is-inverse';
+      }
+    }
+
+    return (
+      <span className={controllerUnitClassName} onClick={this.handleClick}></span>
+    )
+  }
+});
 
 let AppComponent = React.createClass({
   // 初始化/存储 每个图片组件的位置信息
@@ -199,6 +230,7 @@ let AppComponent = React.createClass({
             isCenter:false
           }
         }
+        // debugger;
         // 如果上侧有图片
         if(imgsArrangeTopArr && imgsArrangeTopArr[0]){
           // 还把上侧的图片放回原数组
@@ -292,7 +324,10 @@ let AppComponent = React.createClass({
         }
       }
       ImgFigures.push(<ImgFigure data={value} key={index} ref={'ImgFigure'+index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
-    }.bind(this));
+
+      controllerUnits.push(<ControllerUnit key={index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
+
+  }.bind(this));
 
     return(
       <section className="stage" ref="stage">
